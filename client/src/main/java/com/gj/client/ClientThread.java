@@ -1,5 +1,7 @@
 package com.gj.client;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -12,6 +14,7 @@ import java.util.Set;
 /**
  * @author Gjing
  **/
+@Slf4j
 public class ClientThread implements Runnable{
     private final Selector selector;
 
@@ -55,7 +58,8 @@ public class ClientThread implements Runnable{
         }
         // 再次注册到选择器上，继续监听可读状态
         channel.register(selector, SelectionKey.OP_READ);
-        System.out.println(message);
+        log.info("WHAT ARE YOU 弄啥咧？" + message);
+        System.out.println("WHAT ARE YOU 弄啥咧？" + message);
     }
 }
 

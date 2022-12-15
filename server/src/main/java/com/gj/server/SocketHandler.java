@@ -27,10 +27,11 @@ public class SocketHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         byte[] data = (byte[]) msg;
-        log.info("收到消息: " + new String(data));
+        log.info("收到来自 " + ctx.channel().id().asShortText() + " 的消息: " + new String(data));
         // 给其他人转发消息
         for (Channel client : clients) {
             if (!client.equals(ctx.channel())) {
+                log.info("发送消息给: " + client.id().asShortText());
                 client.writeAndFlush(data);
             }
         }
@@ -44,7 +45,20 @@ public class SocketHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        log.info("客户端断开链接：" + ctx.channel().id().asShortText());
         clients.remove(ctx.channel());
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        log.info("客户端活跃：" + ctx.channel().id().asShortText());
+        super.channelActive(ctx);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        log.info("客户端不活跃：" + ctx.channel().id().asShortText());
+        super.channelInactive(ctx);
     }
 
     @Override
