@@ -1,10 +1,14 @@
 package com.gj.server;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.group.DefaultChannelGroup;
+import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,15 +30,18 @@ public class SocketHandler extends ChannelInboundHandlerAdapter {
      */
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        byte[] data = (byte[]) msg;
-        log.info("收到来自 " + ctx.channel().id().asShortText() + " 的消息: " + new String(data));
+        //byte[] data = (byte[]) msg;
+        log.info("收到来自 " + ctx.channel().id().asShortText() + " 的消息: " + new String(msg));
         // 给其他人转发消息
         for (Channel client : clients) {
             if (!client.equals(ctx.channel())) {
                 log.info("发送消息给: " + client.id().asShortText());
-                client.writeAndFlush(data);
+                client.writeAndFlush("返回数据：" + msg);
             }
         }
+        //final ByteBuf heartbeat = Unpooled.unreleasableBuffer(Unpooled.copiedBuffer("timeout", CharsetUtil.UTF_8));
+
+        ctx.writeAndFlush(msg).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
     }
 
     @Override
